@@ -1,14 +1,30 @@
-import { fine } from "@/lib/fine";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { fine } from "@/lib/fine";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Logout() {
-  if (!fine) return <Navigate to='/' />;
+  const { toast } = useToast();
 
-  const { isPending, data } = fine.auth.useSession();
   useEffect(() => {
-    if (!isPending && data) fine.auth.signOut();
-  }, [data]);
+    const signOut = async () => {
+      try {
+        await fine.auth.signOut();
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to sign out. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
 
-  return !isPending && !data ? <Navigate to='/login' /> : null;
+    signOut();
+  }, [toast]);
+
+  return <Navigate to="/" />;
 }
